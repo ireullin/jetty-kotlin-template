@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+    <Set name="contextPath">/v1.0/jetty-kotlin-template</Set>
+
+    <Call name="insertHandler">
+        <Arg>
+            <New id="RequestLog" class="org.eclipse.jetty.server.handler.RequestLogHandler">
+                <Set name="requestLog">
+                    <New id="RequestLogImpl" class="org.eclipse.jetty.server.NCSARequestLog">
+                        <Set name="filename"><Property name="jetty.logs" default="/opt/jetty/logs"/>/request-yyyy_mm_dd.log</Set>
+                        <Set name="filenameDateFormat">yyyy_MM_dd</Set>
+                        <Set name="LogTimeZone">GMT</Set>
+                        <Set name="retainDays">90</Set>
+                        <Set name="append">true</Set>
+                        <Set name="LogLatency">true</Set>
+                    </New>
+                </Set>
+            </New>
+        </Arg>
+    </Call>
+</Configure>

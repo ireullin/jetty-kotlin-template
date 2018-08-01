@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app metadata-complete="false" version="3.1">
+    <display-name>Archetype Created Web Application</display-name>
+
+    <session-config>
+        <session-timeout>300</session-timeout>
+    </session-config>
+
+    <servlet>
+        <servlet-name>MainController</servlet-name>
+        <servlet-class>controllers.MainController</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>/assets/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>MainController</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+</web-app>
