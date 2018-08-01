@@ -3,6 +3,7 @@ out/
 .idea/
 .gradle/
 gradle/
+log/
 gradlew*
 *.iml
 

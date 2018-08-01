@@ -18,5 +18,9 @@ class Session(val req: HttpServletRequest?, val rsp: HttpServletResponse?, val p
         rsp?.outputStream?.flush()
     }
 
+    fun body() = params["__body__"]
+
+    fun contextPath() = params["__path__"]
+
     operator fun get(paramsKey:String) = params[paramsKey]
 }

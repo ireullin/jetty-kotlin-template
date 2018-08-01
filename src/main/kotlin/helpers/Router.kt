@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse
 
 
 typealias ParamsOfMap = MutableMap<String,String>
-class Router(req: HttpServletRequest?, rsp: HttpServletResponse?) {
+class Router(req: HttpServletRequest?, rsp: HttpServletResponse?, val contextPath:String) {
 
     private val log = LoggerFactory.getLogger(Router::class.java)
     private val req = req
@@ -55,11 +55,12 @@ class Router(req: HttpServletRequest?, rsp: HttpServletResponse?) {
 
 
     private fun match(pattern:String):ParamsOfMap?{
-        val patterns = pattern.split("/")
+        val patterns = (contextPath+pattern).split("/")
         if(patterns.size!=uris?.size)
             return null
 
         val params = mutableMapOf<String,String>()
+        params.put("__path__",contextPath)
         for((i,p) in patterns.withIndex()){
             if(p.length>0 && p[0]==':'){
                 params.put(p.substring(1), uris[i])

@@ -1,5 +1,4 @@
-package controllers
-
+import controllers.VueTest
 import helpers.*
 import org.slf4j.LoggerFactory
 import javax.servlet.ServletConfig
@@ -9,17 +8,25 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @MultipartConfig
-class MainController : HttpServlet() {
-    private val log = LoggerFactory.getLogger(MainController::class.java)
-    private val ENV = Conf["env.name"]
-    private val PREFIX_URL = "/${Conf["env.ver"]}/jetty-kotlin-template"
+class RouteServlet : HttpServlet() {
+    private val log = LoggerFactory.getLogger(RouteServlet::class.java)
+
+    private fun routeMap(router:Router) {
+        router
+            .ifMatch("GET", "/vue_test", { VueTest(it).run() })
+            .ifMatch("GET", "/info", this::showInfo)
+            .ifMatch("GET", "/host", this::showHost)
+            .elseDo(this::showNotFound)
+    }
 
     override fun destroy() {
         super.destroy()
+        log.info("server has finished")
     }
 
     override fun init(config: ServletConfig?) {
         super.init(config)
+        log.info("server has started up")
     }
 
     override fun doPost(req: HttpServletRequest?, rsp: HttpServletResponse?) {
@@ -32,22 +39,15 @@ class MainController : HttpServlet() {
 
     private fun doForAnyRequests(req: HttpServletRequest?, rsp: HttpServletResponse?) {
         try {
+            val prefixUrl = this.servletContext.contextPath
             ResponseExample.setUtf8Encoding(req, rsp)
-            routeMap(Router(req,rsp))
+            routeMap(Router(req,rsp,prefixUrl))
         }
         catch (e:Exception){
             println("badRequest")
             log.info(e.message, e)
             ResponseExample.badRequest(req, rsp)
         }
-    }
-
-    private fun routeMap(router:Router) {
-        router
-        .ifMatch("GET", "$PREFIX_URL/vue_test", { VueTest(it).run() })
-        .ifMatch("GET", "$PREFIX_URL/info", this::showInfo)
-        .ifMatch("GET", "$PREFIX_URL/host", this::showHost)
-        .elseDo(this::showNotFound)
     }
 
     private fun showHost(session: Session){

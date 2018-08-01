@@ -7,8 +7,8 @@
     </session-config>
 
     <servlet>
-        <servlet-name>MainController</servlet-name>
-        <servlet-class>controllers.MainController</servlet-class>
+        <servlet-name>RouteServlet</servlet-name>
+        <servlet-class>RouteServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
@@ -18,7 +18,7 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>MainController</servlet-name>
+        <servlet-name>RouteServlet</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
 

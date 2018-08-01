@@ -2,6 +2,7 @@
 <%@ page import="java.util.*" %>
 <%@ page import="java.util.Map" %>
 <%  final Map<String,String> params = (Map<String,String>)request.getAttribute("params"); %>
+<%  final String CONTEXT_PATH = params.get("__path__"); %>
 
 <!doctype html>
 <html>
@@ -26,7 +27,7 @@
 <body>
 <div class="container-fluid">    
     <%@ include file="/views/Header.jsp" %>  
-    <%= params.get("fuck") %>
+    <%= CONTEXT_PATH %>
     <div id="fuck"></div>
 </div>
 </body>
