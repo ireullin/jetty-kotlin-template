@@ -22,7 +22,7 @@ class Router(req: HttpServletRequest?, rsp: HttpServletResponse?) {
         if(this.hasDone) {
             return
         } else{
-            val session = RouterSession(req, rsp, mutableMapOf())
+            val session = Session(req, rsp, mutableMapOf())
             callback(session)
         }
     }
@@ -47,7 +47,7 @@ class Router(req: HttpServletRequest?, rsp: HttpServletResponse?) {
             req?.parameterMap?.forEach({k,v -> params.put(k, v[0])})
         }
 
-        val session = RouterSession(req,rsp,params)
+        val session = Session(req,rsp,params)
         callback(session)
         this.hasDone = true
         return this

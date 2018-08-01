@@ -50,15 +50,15 @@ class MainController : HttpServlet() {
         .elseDo(this::showNotFound)
     }
 
-    private fun showHost(session: RouterSession){
+    private fun showHost(session: Session){
         session.rsp?.outputStream?.print(Host.name)
     }
 
-    private fun showInfo(session: RouterSession){
-        session.rsp?.outputStream?.print(Conf.toString())
+    private fun showInfo(session: Session){
+        session.render(Conf.toString())
     }
 
-    private fun showNotFound(session: RouterSession){
+    private fun showNotFound(session: Session){
         ResponseExample.notFound(session.req, session.rsp)
     }
 }

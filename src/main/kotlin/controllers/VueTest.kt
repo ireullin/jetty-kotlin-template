@@ -1,11 +1,12 @@
 package controllers
 
-import helpers.RouterSession
+import helpers.Session
+import libs.http.SimpleSender
 
-class VueTest(val session: RouterSession){
+class VueTest(val session: Session){
 
     fun run(){
-        session.params.put("fuck","mother fuck")
+
         session.renderJsp("/views/VueTest.jsp")
     }
 }
