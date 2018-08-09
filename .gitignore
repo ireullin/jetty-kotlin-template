@@ -6,4 +6,4 @@ gradle/
 log/
 gradlew*
 *.iml
-
+*.gz

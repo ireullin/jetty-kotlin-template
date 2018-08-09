@@ -112,7 +112,7 @@ class ImmutableDatetime : Datetime {
     }
 
     override fun reset(dt: ReadOnlyDatetime): Datetime {
-        throw Exception("This is immutable")
+        throw Exception("This is immutable, you can't reset it.")
     }
 
     override fun stamp(): Long {
@@ -163,6 +163,8 @@ class ImmutableDatetime : Datetime {
         return sdf.format(calendar.time)
     }
 
+    override fun toString(): String = toString("yyyy-MM-dd HH:mm:ss.SSS")
+
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
         if (o == null || javaClass != o.javaClass) return false
@@ -195,6 +197,11 @@ class ImmutableDatetime : Datetime {
     override fun toLocalTime(): Datetime {
         val tz = TimeZone.getDefault()
         return ImmutableDatetime(stamp(), tz)
+    }
+
+    override fun peek(callback: (ReadOnlyDatetime)->Unit): Datetime {
+        callback(this)
+        return this
     }
 
     companion object {

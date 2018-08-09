@@ -29,6 +29,13 @@ object Configurations {
         }
     }
 
+    fun toDbOptions(prefix:String) = mapOf<String,String>(
+            "host" to get(prefix+".host"),
+            "dbname" to get(prefix+".dbname"),
+            "user" to get(prefix+".user"),
+            "password" to get(prefix+".password")
+    )
+
     override fun toString(): String {
         return prop.toString()
     }

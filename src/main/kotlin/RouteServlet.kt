@@ -1,3 +1,4 @@
+import controllers.PredictionCRUD
 import controllers.VueTest
 import helpers.*
 import org.slf4j.LoggerFactory
@@ -12,11 +13,14 @@ class RouteServlet : HttpServlet() {
     private val log = LoggerFactory.getLogger(RouteServlet::class.java)
 
     private fun routeMap(router:Router) {
-        router
-            .ifMatch("GET", "/vue_test", { VueTest(it).run() })
-            .ifMatch("GET", "/info", this::showInfo)
-            .ifMatch("GET", "/host", this::showHost)
-            .elseDo(this::showNotFound)
+        router.ifMatch("GET",    "/vue_test",                     { VueTest(it).run() })
+                .ifMatch("GET",  "/show_histories",               { PredictionCRUD(it).showHistories() })
+                .ifMatch("GET",  "/select_predictions/:id/:page", { PredictionCRUD(it).selectPredictions()} )
+                .ifMatch("GET",  "/show_predictions/:id",         { PredictionCRUD(it).showPredictions()} )
+                .ifMatch("POST", "/update_prediction",            { PredictionCRUD(it).updatePrediction()} )
+                .ifMatch("GET",  "/info", this::showInfo)
+                .ifMatch("GET",  "/host", this::showHost)
+                .elseDo(this::showNotFound)
     }
 
     override fun destroy() {

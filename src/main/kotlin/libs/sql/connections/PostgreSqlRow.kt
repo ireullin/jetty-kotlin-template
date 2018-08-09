@@ -15,10 +15,7 @@ class PostgreSqlRow(val rs: ResultSet):SqlRow{
 
     override operator fun get(columnName:String) = rs.getString(columnName)
 
-    override val size by lazy {
-        println("size be called")
-        this.rs.metaData.columnCount
-    }
+    override val size by lazy { this.rs.metaData.columnCount }
 
     override fun columnsName() = (1..size).map { rs.metaData.getColumnName(it)}
 
@@ -26,7 +23,5 @@ class PostgreSqlRow(val rs: ResultSet):SqlRow{
 
     override fun toList() = (1..size).map { rs.getString(it) }
 
-    override fun close() {
-        this.rs.close()
-    }
+    override fun close() { this.rs.close() }
 }

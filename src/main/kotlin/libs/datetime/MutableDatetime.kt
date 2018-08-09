@@ -197,6 +197,11 @@ class MutableDatetime : Datetime {
         return datetime?.stamp() == this.stamp()
     }
 
+    override fun peek(callback: (ReadOnlyDatetime) -> Unit): Datetime {
+        callback(this)
+        return this
+    }
+
     companion object {
         fun readFrom(dtstr: String, format: String): Datetime {
             val sdf = SimpleDateFormat(format)

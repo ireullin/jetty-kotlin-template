@@ -13,4 +13,5 @@ interface ReadOnlyDatetime {
     fun stamp(): Long
     fun getTimeZone(): TimeZone
     fun toString(format: String): String
+    fun peek( callback: (ReadOnlyDatetime)->Unit ): Datetime
 }
