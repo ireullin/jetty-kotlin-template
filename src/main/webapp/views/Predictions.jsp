@@ -176,8 +176,9 @@ function newOptions(doc){
             id: doc['id'],
             itno: doc['item_no'],
             answer: doc['answer'],
+            'top0': top0, // 此項從tops獨立出來比較好處理
             tops: [
-                top0,
+                '',
                 doc['top1_category_no']+'_'+doc['top1_category'],
                 doc['top2_category_no']+'_'+doc['top2_category'],
                 doc['top3_category_no']+'_'+doc['top3_category'],
@@ -187,7 +188,10 @@ function newOptions(doc){
             modifiedAt: ['','','','','',''],
             selectdStyle: {
                 'border': '1.5px solid DodgerBlue',
-                'border-radius': '5px'
+                'border-radius': '3px'
+            },
+            textSelectdStyle: {
+                'border': '1.5px solid DodgerBlue'
             }
         },
 
@@ -200,37 +204,46 @@ function newOptions(doc){
             },
 
             onPressEnter: function(){
-                console.log(0, this.tops[0]);
+                console.log(0, this.top0);
                 updatePrediction(this);
             }
         },
 
+        watch:{
+            top0: function(){
+                console.log("watch top0="+top0);
+            }
+        },
+
         template: [
-            '<div class="form-group">',
+            '<form>',
                 '<template v-for="(t,i) in tops">',
-                    '<div v-if="i>0" :style="answer==i? selectdStyle : \'\'" class="form-check" v-on:click="onClickCategory(i)">',
-                        '<input class="form-check-input" type="radio" :value="i" v-model="answer">',
-                        '&nbsp;&nbsp;&nbsp;&nbsp;',
-                        '<label class="form-check-label" >{{t}}</label>',
-                        '&nbsp;&nbsp;<span style="color:#FF0000">{{modifiedAt[i]}}</span>',
+                    '<div v-if="i>0"  class="form-group" v-on:click="onClickCategory(i)">',
+                        '<input type="radio" :value="i" v-model="answer">',
+                        '&nbsp;',
+                        '<label :style="answer==i? selectdStyle : \'\'">{{t}}</label>',
+                        '&nbsp;&nbsp;',
+                        '<span style="color:#FF0000">{{modifiedAt[i]}}</span>',
                     '</div>',
                 '</template>',
-                '<div :style="answer==0? selectdStyle : \'\'" class="form-check" v-on:click="onClickCategory(0)">',
-                    '<input class="form-check-input" type="radio" :value="0" v-model="answer">',
-                    '&nbsp;&nbsp;&nbsp;&nbsp;',
-                    '<input class="autocomplate" type="text" placeholder="" v-model.trim="tops[0]" v-on:keyup.enter="onPressEnter">',
+                '<div class="form-group" v-on:click="onClickCategory(0)">',
+                    '<input type="radio" :value="0" v-model="answer">',
+                    '&nbsp;',
+                    '<input :style="answer==0? textSelectdStyle : \'\'"  type="text" placeholder="" v-model="top0" v-on:keyup.enter="onPressEnter">',
+                    '<span>{{top0}}</span>',
                     '&nbsp;&nbsp;<span style="color:#FF0000">{{modifiedAt[0]}}</span>',
                 '</div>',
-            '</div>',
+            '</form>',
         ].join('')
     });
 }
 
 function updatePrediction(that){
+    // console.log(that);
     var correctedCategory = "";
     var correctedCategoryNo = "";
     if(that.answer==0){
-        var c = that.tops[0].split('_');
+        var c = that.top0.split('_');
         correctedCategoryNo = c[0];
         correctedCategory = c[1];
         if(correctedCategory==null || correctedCategory=='')
@@ -250,8 +263,10 @@ function updatePrediction(that){
     var url = "<%= CONTEXT_PATH %>/update_prediction";
     Vue.http.post(url, body).then(
         (rsp)=>{
+            console.log(rsp['bodyText']);
             var svrRsp = JSON.parse(rsp['bodyText']);
-            var msg = 'modified at '+svrRsp['header']['ended_at'];
+            var c = svrRsp['header']['ended_at'].split(/[- :.]/);
+            var msg = 'modified at '+c[3]+':'+c[4]+':'+c[5];
             that.$set(that.modifiedAt, that.answer, msg);
         }, 
         (rsp)=>{ 

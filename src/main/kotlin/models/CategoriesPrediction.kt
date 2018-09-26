@@ -1,15 +1,16 @@
 package models
 
-import controllers.PredictionCRUD
+
+
 import helpers.Conf
 import libs.datetime.ImmutableDatetime
-import libs.sql.connections.PostgreSqlConnection
+import libs.sql.connections.JdbcFactory
 import org.slf4j.LoggerFactory
 
 class CategoriesPrediction:AutoCloseable{
     private val log = LoggerFactory.getLogger(CategoriesPrediction::class.java)
 
-    private val cn = PostgreSqlConnection(Conf.toDbOptions("db1"))
+    private val cn = JdbcFactory.newPostgreSql(Conf.toDbOptions("db1"))
 
     fun selectPredictions(predictedHistoryId:String, offset:Int, limit:Int):List<Map<String,String>>{
         val cmd = """
