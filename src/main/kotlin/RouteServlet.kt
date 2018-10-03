@@ -1,5 +1,4 @@
 import controllers.RelatedItems
-import controllers.PredictionCRUD
 import helpers.*
 import libs.json.toJson
 import models.ShowMainDuplication
@@ -18,17 +17,12 @@ class RouteServlet : HttpServlet() {
         router.ifMatch("GET",    "/refresh_show_main",::refreshShowMain)
                 .ifMatch("GET",  "/select_show_main/:sm_seq",::selectShowMain)
 
-
                 .ifMatch("GET",  "/:env/related_items/select_prediction/:sm_seq"){ RelatedItems(it).selectPrediction() }
                 .ifMatch("GET",  "/:env/related_items/select_items"){ RelatedItems(it).selectItems() }
                 .ifMatch("GET",  "/:env/related_items"){ RelatedItems(it).index() }
                 .ifMatch("GET",  "/:env/related_items/:sm_seq"){ RelatedItems(it).index() }
                 .ifMatch("GET",  "/:env/related_items/:sm_seq/:training_id"){ RelatedItems(it).index() }
 
-
-                .ifMatch("GET",  "/select_predictions/:id/:page") { PredictionCRUD(it).selectPredictions()}
-                .ifMatch("GET",  "/show_predictions/:id")         { PredictionCRUD(it).showPredictions()}
-                .ifMatch("POST", "/update_prediction")            { PredictionCRUD(it).updatePrediction()}
                 .ifMatch("GET",  "/info", this::showInfo)
                 .ifMatch("GET",  "/host", this::showHost)
                 .elseDo(this::showNotFound)
