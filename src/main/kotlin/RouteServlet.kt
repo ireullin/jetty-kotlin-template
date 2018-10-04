@@ -1,4 +1,6 @@
+import controllers.Pedm
 import controllers.RelatedItems
+import controllers.ShowMain
 import helpers.*
 import libs.json.toJson
 import models.ShowMainDuplication
@@ -14,40 +16,30 @@ class RouteServlet : HttpServlet() {
     private val log = LoggerFactory.getLogger(RouteServlet::class.java)
 
     private fun routeMap(router:Router) {
-        router.ifMatch("GET",    "/refresh_show_main",::refreshShowMain)
-                .ifMatch("GET",  "/select_show_main/:sm_seq",::selectShowMain)
+        router.ifMatch("GET",    "/refresh_show_main"){ ShowMain(it).refreshShowMain() }
+                .ifMatch("GET",  "/select_show_main/:sm_seq"){ ShowMain(it).selectShowMain() }
+
+                .ifMatch("GET",  "/:env/pedm/import_histories"){ Pedm(it).importHistories() }
+                .ifMatch("GET",  "/:env/pedm/training_histories"){ Pedm(it).trainingHistories() }
+                .ifMatch("GET",  "/:env/pedm/select_members"){ Pedm(it).selectMembers() }
+                .ifMatch("GET",  "/:env/pedm/select_transactions/:member_id"){ Pedm(it).selectTransactions() }
+                .ifMatch("GET",  "/:env/pedm/select_prediction/:member_id"){ Pedm(it).selectPrediction() }
+                .ifMatch("GET",  "/:env/pedm"){ Pedm(it).index() }
+                .ifMatch("GET",  "/:env/pedm/:member_id"){ Pedm(it).index() }
+                .ifMatch("GET",  "/:env/pedm/:member_id/:training_id"){ Pedm(it).index() }
 
                 .ifMatch("GET",  "/:env/related_items/select_prediction/:sm_seq"){ RelatedItems(it).selectPrediction() }
                 .ifMatch("GET",  "/:env/related_items/select_items"){ RelatedItems(it).selectItems() }
+                .ifMatch("GET",  "/:env/related_items/stories"){ RelatedItems(it).histories() }
                 .ifMatch("GET",  "/:env/related_items"){ RelatedItems(it).index() }
                 .ifMatch("GET",  "/:env/related_items/:sm_seq"){ RelatedItems(it).index() }
                 .ifMatch("GET",  "/:env/related_items/:sm_seq/:training_id"){ RelatedItems(it).index() }
 
+
+
                 .ifMatch("GET",  "/info", this::showInfo)
                 .ifMatch("GET",  "/host", this::showHost)
                 .elseDo(this::showNotFound)
-    }
-
-    private fun selectShowMain(session: Session){
-        try {
-            val doc = ShowMainDuplication.queryBySmSeq(session["sm_seq"]!!)!!
-            session.render(doc.toJson())
-        }
-        catch (e:Exception){
-            session.render("not fount. "+e.message)
-        }
-    }
-
-
-    private fun refreshShowMain(session: Session){
-        try {
-            ShowMainDuplication.duplicate(Conf["env.name"],"AW002052")
-            session.render("ok")
-        }
-        catch (e:Exception){
-            session.render("failed because of "+e.message)
-        }
-
     }
 
     override fun destroy() {
@@ -57,7 +49,7 @@ class RouteServlet : HttpServlet() {
 
     override fun init(config: ServletConfig?) {
         super.init(config)
-        ShowMainDuplication.duplicate(Conf["env.name"],"AW002052")
+        ShowMain.startTimer()
         log.info("server has started up")
     }
 

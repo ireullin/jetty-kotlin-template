@@ -42,6 +42,7 @@ dependencies {
     compile group: "org.apache.httpcomponents", name: "httpclient", version: "4.5.1"
     compile group: 'com.uitox', name:'uitox-solrdao', version:'2.2.0'
     compile group: 'com.github.ireullin', name:'IreulToolsForKt', version:'master-SNAPSHOT'
+    compile group: 'com.google.guava', name: 'guava', version: '25.0-jre'
 //    implementation 'com.github.ireullin:IreulToolsForKt:master-SNAPSHOT'
 
     // seems good!?

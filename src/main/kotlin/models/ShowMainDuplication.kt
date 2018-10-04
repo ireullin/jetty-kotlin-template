@@ -2,6 +2,7 @@ package models
 
 import com.fasterxml.jackson.databind.JsonNode
 import helpers.Conf
+import libs.datetime.now
 import libs.json.Json
 import org.slf4j.LoggerFactory
 import solrdao.SolrDao
@@ -20,7 +21,9 @@ object ShowMainDuplication{
     private val indexSmSeq = ConcurrentHashMap<String,ShowMainDoc>()
     private val indexCpName = ConcurrentHashMap<String,ArrayList<ShowMainDoc>>()
     private var wsSeq = ""
+    private var lastUpdatedAt = now()
 
+    fun lastUpdatedAt() = lastUpdatedAt
 
     fun queryBySmSeq(smSeq:String):ShowMainDoc? = indexSmSeq[smSeq]
 
@@ -72,6 +75,7 @@ object ShowMainDuplication{
         log.info("indexSmSeq.size=${indexSmSeq.size}")
         makeIndexCpName()
         threadPool.shutdown()
+        lastUpdatedAt = now()
         return this
     }
 

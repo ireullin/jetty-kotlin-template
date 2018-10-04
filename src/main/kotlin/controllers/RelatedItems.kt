@@ -1,6 +1,5 @@
 package controllers
 
-import helpers.ResponseBuilder
 import helpers.Session
 import libs.json.Json
 import libs.json.toJson
@@ -11,14 +10,21 @@ import org.slf4j.LoggerFactory
 
 class RelatedItems(val session: Session){
     private val log = LoggerFactory.getLogger(this.javaClass)
+    private val sm = ShowMainDuplication
 
     fun index(): Unit {
-        session.renderJsp("/views/alsoView/index.jsp")
+        session.renderJsp("/views/relatedItems/Index.jsp")
+    }
+
+    fun histories(){
+        val histories = models.RelatedItems(session["env"]!!).use { it.selectTrainingHistories() }
+        session.params.put("histories", histories.toJson())
+        session.renderJsp("/views/relatedItems/Histories.jsp")
     }
 
     fun selectItems(){
         val env = session["env"]!!
-        val items = ShowMainDuplication.queryAllData().map { mapOf(
+        val items = sm.queryAllData().map { mapOf(
                 "smSeq" to it.smSeq,
                 "smName" to it.smName,
                 "cpName" to it.cpName
@@ -27,21 +33,20 @@ class RelatedItems(val session: Session){
     }
 
     fun selectPrediction(): Unit {
-        val sm = ShowMainDuplication
         try {
             val smSeq = session["sm_seq"]!!
             val env = session["env"]!!
             val mainItem = sm.queryBySmSeq(smSeq)!!
-            log.info("mainItem="+mainItem.toJson())
-            val predictionRows = models.AlsoView(env).use { it.selectPrediction(smSeq) }
-            log.info(predictionRows["predictions"])
+//            log.info("mainItem="+mainItem.toJson())
+            val predictionRows = models.RelatedItems(env).use { it.selectPrediction(smSeq) }
+//            log.info(predictionRows["predictions"])
             val predictions = mutableMapOf<String,List<Map<String,String>>>()
             val root = Json.parse(predictionRows["predictions"]?:"[]")
             root.fields().forEach { (nameOfAlgorithm,nodeOfAlgorithm) ->
                 val details = nodeOfAlgorithm.map {
                     val smSeq = it["sm_seq"]?.asText() ?: ""
                     val doc = try{
-                        ShowMainDuplication.queryBySmSeq(smSeq)!!
+                        sm.queryBySmSeq(smSeq)!!
                     }catch (e:Exception){
                         log.info("smSeq:$smSeq not found")
                         ShowMainDoc()
@@ -63,6 +68,7 @@ class RelatedItems(val session: Session){
 
             val rsp = mapOf(
                     "id" to predictionRows["id"],
+                    "trainingId" to predictionRows["training_id"],
                     "mainItem" to mainItem,
                     "relatedItems" to predictions,
                     "createdAt" to predictionRows["created_at"]

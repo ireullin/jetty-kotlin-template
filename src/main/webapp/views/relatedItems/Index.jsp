@@ -7,7 +7,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>Analysis</title>
+    <title>RelatedItems</title>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -45,42 +45,14 @@
 <div class="container-fluid">    
     <%@ include file="/views/Header.jsp" %>  
     <br><br>
+    <h4>相關商品查詢</h4>
+    <hr><br>
     <div id="search_bar"></div>
     <br><br>
     <div id="main_item"></div>
-    <br>
-    <br>
-    <h4 id="also_view_title"></h4>
-    <div class="row">
-        <div id="item_id_0_0"></div>
-        <div id="item_id_0_1"></div>
-        <div id="item_id_0_2"></div>
-        <div id="item_id_0_3"></div>
-        <div id="item_id_0_4"></div>
-        <div id="item_id_0_5"></div>
-        <div id="item_id_0_6"></div>
-        <div id="item_id_0_7"></div>
-        <div id="item_id_0_8"></div>
-        <div id="item_id_0_9"></div>
-        <div id="item_id_0_10"></div>
-        <div id="item_id_0_11"></div>
-    </div>
-    <br>
-    <h4 id="lcs_title"></h4>
-    <div class="row">
-        <div id="item_id_1_0"></div>
-        <div id="item_id_1_1"></div>
-        <div id="item_id_1_2"></div>
-        <div id="item_id_1_3"></div>
-        <div id="item_id_1_4"></div>
-        <div id="item_id_1_5"></div>
-        <div id="item_id_1_6"></div>
-        <div id="item_id_1_7"></div>
-        <div id="item_id_1_8"></div>
-        <div id="item_id_1_9"></div>
-        <div id="item_id_1_10"></div>
-        <div id="item_id_1_11"></div>
-    </div>
+    <br><br>
+    <div id="suggest_panel"></div>
+    <br><br>
 </div>
 <br>
 <br>
@@ -99,10 +71,8 @@ function onGoogleChartReady(){
     console.log(smSeq);
     if(smSeq=="null" || smSeq=="")
         return;
-    
+
     selectSmSeq(smSeq);
-    $('#also_view_title').html("其他人也看了");
-    $('#lcs_title').html("我覺得你應該喜歡");
 }
 
 function selectItems(){
@@ -142,7 +112,7 @@ function onSelectItems(e){
     var rows = data.map((r)=>{
         return {label: r.smSeq+" "+r.smName, category: r.cpName };
     });
-    console.log(rows);
+    // console.log(rows);
 
     initAutocomplete(rows);
 }
@@ -161,10 +131,11 @@ function selectSmSeq(smSeq){
 function onSelectSmSeq(e){       
     console.log(e);
     var data = JSON.parse(e);
-    
+    newPanel();
     var algs = ['av','lcs'];
     for(var i=0; i<algs.length; i++ ){
         var alg = algs[i];
+        // newPanel(data['relatedItems'][alg]);
         for(var j=0; j<data['relatedItems'][alg].length; j++ ){
             if(j>=12)
                 break
@@ -174,31 +145,57 @@ function onSelectSmSeq(e){
         }
     }
     
-    newMainItem(data['mainItem'],data['createdAt']);
+    newMainItem(data['mainItem'],data['createdAt'],data['trainingId']);
 }            
 
+function newPanel(){
+    return new Vue({
+        el: '#suggest_panel',
+        data: {},
+        computed: {},
+        template: [
+            '<div id="suggest_panel">',
+                '<h4>其他人也看了</h4>',
+                '<div class="row">',
+                    '<template v-for="i in 12">',
+                        '<div :id="\'item_id_0_\'+(i-1)"></div>',
+                    '</template>',
+                '</div>',
+                '<br>',
+                '<h4>我覺得你應該喜歡</h4>',
+                '<div class="row">',
+                    '<template v-for="i in 12">',
+                        '<div :id="\'item_id_1_\'+(i-1)"></div>',
+                    '</template>',
+                '</div>',
+            '</div>'
+        ].join(''),
 
-function newMainItem(item, createdAt){
+    });
+}
+
+
+function newMainItem(item, createdAt, trainingId){
     return new Vue({
         el: '#main_item',
-
         data: {
             smSeq: item['smSeq'],
             smName: item['smName'],
             smPic: 'https://img.uitox.com'+item['smPic'],
             cpName: item['cpName'],
+            trainingId: trainingId,
             createdAt: createdAt,
         },
-
-        
         template: [
             '<div class="row">',
                 '<div class="col-lg-2">',
                     '<img class="card-img-top" :src="smPic">',
                 '</div>',
                 '<div class="col-lg-10">',
-                    '<h5 class="mt-0">{{smName}}<small>{{cpName}}</small></h5>',
-                    '<p>{{smSeq}}</p>',
+                    '<h4>{{cpName}}</h4>',
+                    '<h5>{{smName}}</h5>',
+                    '<br><p>{{smSeq}}</p>',
+                    '<p>trainingId:{{trainingId}}</p>',
                     '<p>{{createdAt}}</p>',
                 '</div>',
             '</div>'
@@ -227,14 +224,15 @@ function newRelatedItem(id, item){
 
         template: [
             '<div class="col-lg-1">',
-            '<div class="card">',
-                '<img class="card-img-top" :src="smPic" :title="smName">',
-                '<div class="card-body">',
-                    '<p style="font-size:8px;">{{cpName}}',
-                    '<br>{{shortName}}</p>',
-                    '<p style="font-size:8px;">score:{{shortScore}}</p>',
+                '<div class="card">',
+                    '<img class="card-img-top" :src="smPic" :title="smName">',
+                    '<div class="card-body">',
+                        '<p style="font-size:8px;">{{cpName}}',
+                        '<br>{{shortName}}</p>',
+                        '<p style="font-size:8px;">score:{{shortScore}}</p>',
+                        '<p style="font-size:8px;">{{smSeq}}</p>',
+                    '</div>',
                 '</div>',
-            '</div>',
             '</div>'
         ].join(''),
 
