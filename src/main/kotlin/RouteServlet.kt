@@ -22,7 +22,7 @@ class RouteServlet : HttpServlet() {
                 .ifMatch("GET",  "/:env/pedm/import_histories"){ Pedm(it).importHistories() }
                 .ifMatch("GET",  "/:env/pedm/training_histories"){ Pedm(it).trainingHistories() }
                 .ifMatch("GET",  "/:env/pedm/select_members"){ Pedm(it).selectMembers() }
-                .ifMatch("GET",  "/:env/pedm/select_transactions/:member_id"){ Pedm(it).selectTransactions() }
+//                .ifMatch("GET",  "/:env/pedm/select_transactions/:member_id"){ Pedm(it).selectTransactions() }
                 .ifMatch("GET",  "/:env/pedm/select_prediction/:member_id"){ Pedm(it).selectPrediction() }
                 .ifMatch("GET",  "/:env/pedm"){ Pedm(it).index() }
                 .ifMatch("GET",  "/:env/pedm/:member_id"){ Pedm(it).index() }

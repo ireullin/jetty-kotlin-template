@@ -29,36 +29,66 @@ class Pedm(val session: Session){
         session.renderJsp("/views/pedm/Index.jsp")
     }
 
-    fun selectTransactions(){
-        val env = session["env"]!!
-        val memberId = session["member_id"]!!
-        val from = (now() - 30.days).toBeginOfDay()
-        val transactions = Recommendation(env).use { it.selectTransactions(memberId, from) }
-                .groupBy { it["tranid"] }
-                .toJson()
-
-        session.render(transactions)
-    }
+//    fun selectTransactions(){
+//        val env = session["env"]!!
+//        val memberId = session["member_id"]!!
+//        val from = (now() - 30.days).toBeginOfDay()
+//        val transactions = Recommendation(env).use { it.selectTransactions(memberId, from) }
+//                .groupBy { it["tranid"] }
+//                .toJson()
+//
+//        session.render(transactions)
+//
+//    }
 
     fun selectPrediction(){
         try {
             val env = session["env"]!!
             val memberId = session["member_id"]!!
-            val predictionRow = Recommendation(env).use { it.selectPrediction(memberId) }
-            val predictions = Json.parse(predictionRow["recommendation_list"]!!)
-                    .map {
-                        val doc = ShowMainDuplication.queryBySmSeq(it["sm_seq"]?.asText()?:"")?: ShowMainDoc()
-                        mapOf(
-                                "smSeq" to (it["sm_seq"]?.asText()?:""),
-                                "from" to it["cpname_from"]?.joinToString(","){ it.asText()?:"" },
-                                "ref" to (it["ref"]?.asText()?:""),
-                                "cpName" to doc.cpName,
-                                "smPic" to doc.smPic,
-                                "smName" to doc.smName
-                        )
-                    }
+            val wsSeq = "AW002052"
+            Recommendation(env).use {cn ->
+                val p = cn.selectRecommendationForUsers(memberId)
+                val tranDate = ImmutableDatetime.readFrom(p["created_at"]!!, "yyyy-MM-dd HH:mm:ss").toBeginOfDay()
+                val tranDate1MonthAgo = tranDate - 30.days
+                val tranHistories = cn.selectTransactions(wsSeq, memberId, tranDate1MonthAgo, tranDate)
+                        .groupBy { it["cp_name"] }
+                        .mapValues {(_,v) -> v.sortedBy { -ImmutableDatetime.readFrom(p["created_at"]!!, "yyyy-MM-dd HH:mm:ss").stamp() }}
 
-            session.render(predictions.toJson())
+                data class prediction(val smSeq:String, val smName:String, val cpName:String, val smPic:String, val ref:String, val from:List<String>)
+
+                val predictions = Json.parse(p["recommendation_list"]!!)
+                        .map{ n ->
+                            val doc = ShowMainDuplication.queryBySmSeq(n["sm_seq"]?.asText()?:"")?: ShowMainDoc()
+                            prediction(
+                                    n["sm_seq"]?.asText()?:"",
+                                    doc.smName, doc.cpName, doc.smPic,
+                                    n["ref"]?.asText()?:"",
+                                    n["cpname_from"]?.map{it.asText()}?: listOf()
+                            )
+                        }
+                        .filter { it.smName != "" }
+                        .groupBy { it.from.sorted() }
+                        .mapValues { (cpnames, predictions) ->
+                            val becauseOf = cpnames.flatMap { cpName ->
+                                val trans = tranHistories[cpName]?: listOf()
+                                trans.map{
+                                    mapOf(
+                                            "tranId" to it["tranid"],
+                                            "tranDate" to it["tran_date"],
+                                            "smSeq" to it["sm_seq"],
+                                            "smName" to it["sm_name"],
+                                            "cpName" to it["cp_name"],
+                                            "quantity" to it["quantity"]
+                                    )
+                                }
+                            }
+                            mapOf("predictions" to predictions, "becauseOf" to becauseOf)
+                        }
+                        .toJson()
+
+//                val boughtAfterPredicted = cn.selectTransactions(wsSeq, memberId, tranDate, now())
+                session.render(predictions)
+            }
         }
         catch (e:Exception){
             log.info(e.message, e)

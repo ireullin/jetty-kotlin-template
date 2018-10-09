@@ -51,6 +51,7 @@
     <br><br>
     <h4 id="member_id"></h4>
     <br>
+    <div id="panel"></div>
     <div class="row">
         <div id="item_id_0"></div>
         <div id="item_id_1"></div>
@@ -158,50 +159,51 @@ function selectPrediction(memberId){
 function onSelectPrediction(e){       
     var data = JSON.parse(e);
     console.log(data)
-    var idx = 0;
-    for(var i in data){
-        if(data[i].smPic=="")
-            continue;
-
-        var id = "item_id_"+idx;
-        newItem(id, data[i]);
-        idx++;
-    }
-}            
-
-function newItem(id, item){
-
-    return new Vue({
-        el: '#'+id,
+    new Vue({
+        el: '#panel',
         data: {
-            smSeq: item['smSeq'],
-            smName: item['smName'],
-            smPic: 'https://img.uitox.com'+item['smPic'],
-            cpName: item['cpName'],
-            ref: item['ref'],
-            from: item['from']
+            allData: data
         },
-        computed: {
-            shortName: function(){return this.smName.substr(0,15);},
+        methods: {
+            bought: function(items){
+                var joint = items.map((item)=>{
+                    return '<a href="#">'+item.smName+'</a>';
+                }).join(" ");
+                return "因為您喜歡 "+joint+"<br>所以我想向您推薦";
+            },
+            picHost: function(url){
+                return 'https://img.uitox.com'+url;
+            }
         },
         template: [
-            '<div class="col-lg-2">',
-                '<div class="card">',
-                    '<img class="card-img-top" :src="smPic" :title="smName">',
-                    '<div class="card-body">',
-                        '<h6>{{shortName}}</h6>',
-                        '<p>{{cpName}}</p>',
-                        '<hr>',
-                        '<p style="font-size:8px;">你買過：{{from}}</p>',
-                        '<p style="font-size:8px;">{{smSeq}}</p>',
-                        '<p style="font-size:8px;">{{ref}}</p>',
-                    '</div>',
+            '<div>',
+            '<template v-for="group in allData">',
+                '<p v-html="bought(group.becauseOf)"></p>',
+                '<div class="row">',
+                    '<template v-for="item in group.predictions">',
+                        '<div class="col-lg-2">',
+                            '<div class="card">',
+                                '<img class="card-img-top" :src="picHost(item.smPic)" v-bind:title="item.smName">',
+                                '<div class="card-body">',
+                                    '<h6>{{item.smName}}</h6>',
+                                    '<p>{{item.cpName}}</p>',
+                                    '<hr>',
+                                    '<p style="font-size:8px;">你買過：{{item.from}}</p>',
+                                    '<p style="font-size:8px;">{{item.smSeq}}</p>',
+                                    '<p style="font-size:8px;">{{item.ref}}</p>',
+                                '</div>',
+                            '</div>',
+                        '</div>',        
+                    '</template>',    
                 '</div>',
-            '</div>'
+                '<br><br>',
+            '</template>',
+            '</div>',
         ].join(''),
 
     });
-}
+}            
+
 
 
 // 啟動自動完成

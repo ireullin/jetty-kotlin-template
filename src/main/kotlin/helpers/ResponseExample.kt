@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse
 object ResponseExample {
     private val log = LoggerFactory.getLogger(ResponseExample::class.java)
 
-    fun notFound(req: HttpServletRequest?, rsp: HttpServletResponse?): HttpServletResponse? {
+    inline fun notFound(req: HttpServletRequest?, rsp: HttpServletResponse?): HttpServletResponse? {
         rsp?.status = 404
         val out = rsp?.outputStream
         out?.print("not found")
@@ -15,7 +15,7 @@ object ResponseExample {
         return rsp
     }
 
-    fun badRequest(req: HttpServletRequest?, rsp: HttpServletResponse?): HttpServletResponse? {
+    inline fun badRequest(req: HttpServletRequest?, rsp: HttpServletResponse?): HttpServletResponse? {
         rsp?.status = 400
         val out = rsp?.outputStream
         out?.print("bad request")
@@ -23,8 +23,9 @@ object ResponseExample {
         return rsp
     }
 
-    fun setUtf8Encoding(req: HttpServletRequest?, rsp: HttpServletResponse?) {
+    inline fun setUtf8Encoding(req: HttpServletRequest?, rsp: HttpServletResponse?) {
         req?.characterEncoding = "UTF-8"
         rsp?.characterEncoding = "UTF-8"
+        rsp?.addHeader("Content-Type", "text/html; charset=UTF-8")
     }
 }
